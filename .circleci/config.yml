@@ -1,0 +1,191 @@
+version: 2.1
+
+parameters:
+  gio_action:
+    type: enum
+    enum: [cicd_test1, cicd_test2, blank]
+    default: cicd_test2
+  gio_product_version:
+    type: string
+    default: "78.15.42"
+orbs:
+  secrethub: secrethub/cli@1.1
+  gravitee: gravitee-io/gravitee@dev:1.0.4
+jobs:
+  cicd_test1_job1:
+    docker:
+     - image: 'cimg/base:stable'
+    resource_class: medium
+    # working_directory: /mnt/ramdisk
+    environment:
+      GIO_PRODUCT_VERSION: << pipeline.parameters.gio_product_version >>
+      RELEASE_REPO: git@github.com:gravitee-lab/release-with-nexus-staging-test1
+      SECRETHUB_ORG: gravitee-lab
+      SECRETHUB_REPO: cicd
+      GIT_SSH_PUB_KEY: 'secrethub://gravitee-lab/cicd/graviteebot/git/ssh/public_key'
+      GIT_SSH_PRV_KEY: 'secrethub://gravitee-lab/cicd/graviteebot/git/ssh/private_key'
+    steps:
+      # secrethub cannot be installed directly into a docker image
+      # So git_config orb cannot be used as is into a docker container.
+      #
+      # - secrethub/install
+      # - gravitee/git_config:
+          # secrethub_org: $SECRETHUB_ORG
+          # secrethub_repo: $SECRETHUB_REPO
+      - secrethub/exec:
+          command: |
+                    mkdir -p /tmp/graviteebot/.secrets/.ssh.gravitee.io
+                    echo $GIT_SSH_PUB_KEY > /tmp/graviteebot/.secrets/.ssh.gravitee.io/id_rsa.pub
+                    echo $GIT_SSH_PRV_KEY > /tmp/graviteebot/.secrets/.ssh.gravitee.io/id_rsa
+                    ssh-keygen -R github.com
+                    mkdir -p ~/.ssh
+                    touch ~/.ssh/known_hosts
+                    chmod 700 -R ~/.ssh/
+                    ssh-keyscan -H github.com >> ~/.ssh/known_hosts
+                    chmod 700 /tmp/graviteebot/.secrets/.ssh.gravitee.io
+                    chmod 644 /tmp/graviteebot/.secrets/.ssh.gravitee.io/id_rsa.pub
+                    chmod 600 /tmp/graviteebot/.secrets/.ssh.gravitee.io/id_rsa
+                    ssh-add -D
+                    # cat /tmp/graviteebot/.secrets/.ssh.gravitee.io/id_rsa
+                    # ssh-add /tmp/graviteebot/.secrets/.ssh.gravitee.io/id_rsa
+                    ssh -Ti /tmp/graviteebot/.secrets/.ssh.gravitee.io/id_rsa git@github.com || true
+                    exit 0
+      - run:
+          name: "Checking env."
+          command: |
+                    echo "value of GIO_PRODUCT_VERSION = [$GIO_PRODUCT_VERSION]"
+                    echo "value of GIO_PRODUCT_VERSION = [${GIO_PRODUCT_VERSION}]"
+                    echo "value of RELEASE_REPO = [${RELEASE_REPO}]"
+                    echo "value of SECRETHUB_ORG = [${SECRETHUB_ORG}]"
+                    echo "value of SECRETHUB_REPO = [${SECRETHUB_REPO}]"
+      - persist_to_workspace:
+          root: /tmp
+          paths:
+            - graviteebot
+
+  cicd_test1_job2:
+    docker:
+     - image: 'cimg/base:stable'
+    resource_class: medium
+    # working_directory: /mnt/ramdisk
+    environment:
+      GIO_PRODUCT_VERSION: << pipeline.parameters.gio_product_version >>
+      RELEASE_REPO: git@github.com:gravitee-lab/release-with-nexus-staging-test1
+    steps:
+      - attach_workspace:
+          at: /tmp
+      - run:
+          name: "Retrieving Git SSH config from workspace"
+          command: |
+                    # mkdir -p /tmp/graviteebot/.secrets/.ssh.gravitee.io
+                    # echo $GIT_SSH_PUB_KEY > /tmp/graviteebot/.secrets/.ssh.gravitee.io/id_rsa.pub
+                    # echo $GIT_SSH_PRV_KEY > /tmp/graviteebot/.secrets/.ssh.gravitee.io/id_rsa
+                    echo "check [/tmp]"
+                    ls -allh /tmp
+                    echo "check [/tmp/graviteebot]"
+                    ls -allh /tmp/graviteebot
+                    echo "check [/tmp/graviteebot/.secrets/.ssh.gravitee.io]"
+                    ls -allh /tmp/graviteebot/.secrets/.ssh.gravitee.io
+                    # --
+                    mkdir -p ~/.ssh
+                    chmod 700 ~/.ssh
+                    touch ~/.ssh/known_hosts
+                    ssh-keygen -R github.com
+                    ssh-keyscan -H github.com >> ~/.ssh/known_hosts
+                    chmod 700 /tmp/graviteebot/.secrets/.ssh.gravitee.io
+                    chmod 644 /tmp/graviteebot/.secrets/.ssh.gravitee.io/id_rsa.pub
+                    chmod 600 /tmp/graviteebot/.secrets/.ssh.gravitee.io/id_rsa
+                    ssh-add -D
+                    # cat /tmp/graviteebot/.secrets/.ssh.gravitee.io/id_rsa
+                    # ssh-add /tmp/graviteebot/.secrets/.ssh.gravitee.io/id_rsa
+                    ssh -Ti /tmp/graviteebot/.secrets/.ssh.gravitee.io/id_rsa git@github.com || true
+
+      - run:
+          name: "Testing Git config : Git cloning"
+          command: |
+                    echo "value of GIO_PRODUCT_VERSION = [$GIO_PRODUCT_VERSION]"
+                    echo "value of GIO_PRODUCT_VERSION = [${GIO_PRODUCT_VERSION}]"
+                    echo "value of RELEASE_REPO = [${RELEASE_REPO}]"
+                    echo "value of SECRETHUB_ORG = [${SECRETHUB_ORG}]"
+                    echo "value of SECRETHUB_REPO = [${SECRETHUB_REPO}]"
+                    export OPS_HOME=$(pwd)
+                    echo "Current diectory: [$(pwd)]"
+                    git clone ${RELEASE_REPO} ${HOME}/retrieved-release-repo
+                    export LOCAL_RELEASE_REPO=${HOME}/retrieved-release-repo
+
+  cicd_test2_job1:
+    docker:
+     - image: 'cimg/base:stable'
+    resource_class: medium
+    # working_directory: /mnt/ramdisk
+    environment:
+      GIO_PRODUCT_VERSION: << pipeline.parameters.gio_product_version >>
+      RELEASE_REPO: git@github.com:gravitee-lab/release-with-nexus-staging-test1
+      SECRETHUB_ORG: gravitee-lab
+      SECRETHUB_REPO: cicd
+      GPG_PUB_KEY: 'secrethub://graviteeio/cicd/graviteebot/gpg/pub_key'
+      GPG_PRV_KEY: 'secrethub://graviteeio/cicd/graviteebot/gpg/private_key'
+    steps:
+      - secrethub/exec:
+          command: |
+                    mkdir -p /tmp/graviteebot/.secrets/.gungpg
+                    echo $GPG_PUB_KEY > /tmp/graviteebot/.secrets/.gungpg/graviteebot.gpg.pub.key
+                    echo $GPG_PRV_KEY > /tmp/graviteebot/.secrets/.gungpg/graviteebot.gpg.priv.key
+
+                    export EPHEMERAL_KEYRING_FOLDER_ZERO=$(mktemp -d -t "gpg_home-XXXXXXXXXX")
+                    chmod 700 ${EPHEMERAL_KEYRING_FOLDER_ZERO}
+                    export GNUPGHOME=${EPHEMERAL_KEYRING_FOLDER_ZERO}
+                    echo "GPG Keys before import : "
+                    # this wil generate a new Key ring into ${EPHEMERAL_KEYRING_FOLDER_ZERO}
+                    gpg --list-keys
+                    echo "content of [\${EPHEMERAL_KEYRING_FOLDER_ZERO}]=[${EPHEMERAL_KEYRING_FOLDER_ZERO}] : "
+                    ls -allh ${EPHEMERAL_KEYRING_FOLDER_ZERO}
+                    exit 0
+      - persist_to_workspace:
+          root: /tmp
+          paths:
+            - graviteebot
+
+  cicd_test2_job2:
+    docker:
+     - image: 'cimg/base:stable'
+    resource_class: medium
+    # working_directory: /mnt/ramdisk
+    environment:
+      GIO_PRODUCT_VERSION: << pipeline.parameters.gio_product_version >>
+      RELEASE_REPO: git@github.com:gravitee-lab/release-with-nexus-staging-test1
+    steps:
+      - attach_workspace:
+          at: /tmp
+      - run:
+          name: "Retrieving GPG config from workspace"
+          command: |
+                    echo "retrieving GNUPGHOME"
+                    export TMP_FOLDER_NAME=$(ls -allh /tmp/ | grep 'gpg_home' | awk '{print $NF}')
+                    export GNUPGHOME=/tmp/${TMP_FOLDER_NAME}
+                    echo "Checking content of GNUPGHOME=[${GNUPGHOME}]"
+                    ls -allh ${GNUPGHOME}
+
+workflows:
+  version: 2.1
+  cicd_test1_wf:
+    when:
+      equal: [ cicd_test1, << pipeline.parameters.gio_action >> ]
+    jobs:
+      - cicd_test1_job1:
+          context: cicd-orchestrator
+      - cicd_test1_job2:
+          requires:
+            - cicd_test1_job1
+          context: cicd-orchestrator
+
+  cicd_test2_wf:
+    when:
+      equal: [ cicd_test2, << pipeline.parameters.gio_action >> ]
+    jobs:
+      - cicd_test2_job1:
+          context: cicd-orchestrator
+      - cicd_test2_job2:
+          requires:
+            - cicd_test2_job1
+          context: cicd-orchestrator
