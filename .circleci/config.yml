@@ -147,6 +147,7 @@ jobs:
           root: /tmp
           paths:
             - graviteebot
+            - graviteebot/ephemeral_gpg_ring
 
   cicd_test2_job2:
     docker:
