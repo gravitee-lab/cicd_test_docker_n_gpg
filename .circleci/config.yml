@@ -173,10 +173,10 @@ jobs:
                     echo "Checking content of GNUPGHOME=[${GNUPGHOME}]"
                     ls -allh ${GNUPGHOME}
       - gravitee/gpg_config:
-          GPG_KEYRING_PATH: "/tmp/graviteebot/ephemeral_gpg_ring"
-          PATH_TO_GPG_PUB_KEY_FILE: /tmp/graviteebot/.secrets/.gungpg/ccc
-          PATH_TO_GPG_PRIVATE_KEY_FILE: /tmp/graviteebot/.secrets/.gungpg/ccc
-          GPG_SIGNING_KEY_ID: ${GIO_GPG_KEY_ID}
+          gpg_keyring_path: "/tmp/graviteebot/ephemeral_gpg_ring"
+          path_to_gpg_pub_key_file: "/tmp/graviteebot/.secrets/.gungpg/pub_key"
+          path_to_gpg_private_key_file: "/tmp/graviteebot/.secrets/.gungpg/private_key"
+          gpg_signing_key_id: ${GIO_GPG_KEY_ID}
 
 workflows:
   version: 2.1
