@@ -128,6 +128,7 @@ jobs:
       - secrethub/exec:
           command: |
                     mkdir -p /tmp/graviteebot/.secrets/.gungpg
+                    
                     # echo $GIO_GPG_PUB_KEY > /tmp/graviteebot/.secrets/.gungpg/graviteebot.gpg.pub.key
                     # echo $GIO_GPG_PRV_KEY > /tmp/graviteebot/.secrets/.gungpg/graviteebot.gpg.priv.key
 
@@ -140,7 +141,7 @@ jobs:
                     chmod 700 ${EPHEMERAL_KEYRING_FOLDER_ZERO}
                     export GNUPGHOME=${EPHEMERAL_KEYRING_FOLDER_ZERO}
                     echo "GPG Keys before import : "
-                    # this wil generate a new Key ring into ${EPHEMERAL_KEYRING_FOLDER_ZERO}
+                    # This will generate a new Key ring into ${EPHEMERAL_KEYRING_FOLDER_ZERO}
                     gpg --list-keys
                     echo "content of [\${EPHEMERAL_KEYRING_FOLDER_ZERO}]=[${EPHEMERAL_KEYRING_FOLDER_ZERO}] : "
                     ls -allh ${EPHEMERAL_KEYRING_FOLDER_ZERO}
