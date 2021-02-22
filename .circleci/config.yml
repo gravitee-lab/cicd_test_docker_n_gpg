@@ -123,14 +123,14 @@ jobs:
       RELEASE_REPO: git@github.com:gravitee-lab/release-with-nexus-staging-test1
       SECRETHUB_ORG: gravitee-lab
       SECRETHUB_REPO: cicd
-      GPG_PUB_KEY: 'secrethub://graviteeio/cicd/graviteebot/gpg/pub_key'
-      GPG_PRV_KEY: 'secrethub://graviteeio/cicd/graviteebot/gpg/private_key'
+      GIO_GPG_PUB_KEY: 'secrethub://graviteeio/cicd/graviteebot/gpg/pub_key'
+      GIO_GPG_PRV_KEY: 'secrethub://graviteeio/cicd/graviteebot/gpg/private_key'
     steps:
       - secrethub/exec:
           command: |
                     mkdir -p /tmp/graviteebot/.secrets/.gungpg
-                    echo $GPG_PUB_KEY > /tmp/graviteebot/.secrets/.gungpg/graviteebot.gpg.pub.key
-                    echo $GPG_PRV_KEY > /tmp/graviteebot/.secrets/.gungpg/graviteebot.gpg.priv.key
+                    echo $GIO_GPG_PUB_KEY > /tmp/graviteebot/.secrets/.gungpg/graviteebot.gpg.pub.key
+                    echo $GIO_GPG_PRV_KEY > /tmp/graviteebot/.secrets/.gungpg/graviteebot.gpg.priv.key
 
                     export EPHEMERAL_KEYRING_FOLDER_ZERO=$(mktemp -d -t "gpg_home-XXXXXXXXXX")
                     chmod 700 ${EPHEMERAL_KEYRING_FOLDER_ZERO}
