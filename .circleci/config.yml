@@ -142,6 +142,7 @@ jobs:
                     echo "content of [\${EPHEMERAL_KEYRING_FOLDER_ZERO}]=[${EPHEMERAL_KEYRING_FOLDER_ZERO}] : "
                     ls -allh ${EPHEMERAL_KEYRING_FOLDER_ZERO}
                     exit 0
+                    
       - persist_to_workspace:
           root: /tmp
           paths:
@@ -172,7 +173,7 @@ jobs:
                     export GNUPGHOME=${EPHEMERAL_KEYRING_FOLDER_ZERO}
                     echo "Checking content of GNUPGHOME=[${GNUPGHOME}]"
                     ls -allh ${GNUPGHOME}
-                    
+
       - gravitee/gpg_config:
           gpg_keyring_path: "/tmp/graviteebot/ephemeral_gpg_ring"
           path_to_gpg_pub_key_file: "/tmp/graviteebot/.secrets/.gungpg/graviteebot.gpg.pub.key"
