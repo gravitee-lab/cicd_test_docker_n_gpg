@@ -171,7 +171,7 @@ jobs:
                     export EPHEMERAL_KEYRING_FOLDER_ZERO="/tmp/graviteebot/ephemeral_gpg_ring"
                     echo "Checking content of EPHEMERAL_KEYRING_FOLDER_ZERO=[${EPHEMERAL_KEYRING_FOLDER_ZERO}]"
                     ls -allh ${EPHEMERAL_KEYRING_FOLDER_ZERO}
-                    export GNUPGHOME=/tmp/${TMP_FOLDER_NAME}
+                    export GNUPGHOME=${EPHEMERAL_KEYRING_FOLDER_ZERO}
                     echo "Checking content of GNUPGHOME=[${GNUPGHOME}]"
                     ls -allh ${GNUPGHOME}
 
