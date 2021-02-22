@@ -160,6 +160,8 @@ jobs:
       - run:
           name: "Retrieving GPG config from workspace"
           command: |
+                    echo "Checking content of [/tmp]"
+                    ls -allh /tmp/
                     echo "retrieving GNUPGHOME"
                     export TMP_FOLDER_NAME=$(ls -allh /tmp/ | grep 'gpg_home' | awk '{print $NF}')
                     export GNUPGHOME=/tmp/${TMP_FOLDER_NAME}
