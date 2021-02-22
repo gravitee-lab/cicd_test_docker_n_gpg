@@ -167,9 +167,10 @@ jobs:
                     echo "Checking content of [/tmp/graviteebot/.secrets/.gungpg/]"
                     ls -allh /tmp/graviteebot/.secrets/.gungpg/
 
-                    echo "retrieving GNUPGHOME"
-                    export TMP_FOLDER_NAME=$(ls -allh /tmp/ | grep 'gpg_home' | awk '{print $NF}')
-                    export GNUPGHOME=/tmp/${TMP_FOLDER_NAME}
+                    export EPHEMERAL_KEYRING_FOLDER_ZERO="/tmp/graviteebot/ephemeral_gpg_ring"
+                    echo "Checking content of EPHEMERAL_KEYRING_FOLDER_ZERO=[${EPHEMERAL_KEYRING_FOLDER_ZERO}]"
+                    ls -allh ${EPHEMERAL_KEYRING_FOLDER_ZERO}
+                    export GNUPGHOME=/tmp/${TMP_FOLDER_NAME}<
                     echo "Checking content of GNUPGHOME=[${GNUPGHOME}]"
                     ls -allh ${GNUPGHOME}
 
